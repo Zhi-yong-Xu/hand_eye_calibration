@@ -1,4 +1,3 @@
-# generate_board.py
 import argparse
 import json
 import cv2
@@ -14,8 +13,7 @@ def build_charuco_board(b):
     aruco_dict = cv2.aruco.getPredefinedDictionary(dict_id)
     return cv2.aruco.CharucoBoard(
         (b["squares_x"], b["squares_y"]),
-        b["square_len"], b["marker_len"], aruco_dict
-    )
+        b["square_len"], b["marker_len"], aruco_dict)
 
 def generate_charuco_image(b, board):
     w = b["squares_x"] * b["px_per_square"] + 2 * b["margin_px"]
@@ -33,7 +31,9 @@ def generate_chessboard_image(b):
     return img
 
 def physical_size(b):
-    px, m, sq = b["px_per_square"], b.get("margin_px", 0), b["square_len"]
+    px = b["px_per_square"]
+    m = b["margin_px"]           # 严格索引
+    sq = b["square_len"]
     W = (b["squares_x"] * px + 2 * m) / px * sq
     H = (b["squares_y"] * px + 2 * m) / px * sq
     return W, H
@@ -45,8 +45,8 @@ def save_meta(b):
         "squares_x": b["squares_x"],
         "squares_y": b["squares_y"],
         "square_len_m": b["square_len"],
-        "marker_len_m": b.get("marker_len") if b["type"] == "charuco" else None,
-        "aruco_dict": b.get("aruco_dict"),
+        "marker_len_m": b["marker_len"] if b["type"] == "charuco" else None,
+        "aruco_dict": b["aruco_dict"],
         "origin": b["origin"],
         "inner_corner_grid": [b["squares_x"] - 1, b["squares_y"] - 1],
         "px_per_square": b["px_per_square"],
@@ -60,7 +60,7 @@ def main():
     parser = argparse.ArgumentParser(description="生成标定板图片与元数据")
     parser.add_argument("--config", type=str, required=True, help="配置文件路径")
     args = parser.parse_args()
-    
+
     cfg = load_config(args.config)
     b = cfg["board"]
 
@@ -89,7 +89,6 @@ def main():
     print(f"  图片尺寸    : {img.shape[1]} x {img.shape[0]} px")
     print(f"  原点位置    : {b['origin']}")
     print(f"  元数据      : {b['meta_path']}")
-    print("\n[提示] 标定脚本启动时会自动注入板子，geom 尺寸与上述物理尺寸严格一致。")
 
 if __name__ == "__main__":
     main()

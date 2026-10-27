@@ -16,10 +16,10 @@ def load_board_meta(meta_path):
         )
     with open(meta_path, "r", encoding="utf-8") as f:
         meta = json.load(f)
-    
-    # 校验关键字段是否齐全，缺一不可
-    required_keys = ["squares_x", "squares_y", "square_len_m", "marker_len_m", 
-                     "aruco_dict", "px_per_square", "margin_px"]
+
+    # 校验关键字段是否齐全，缺一不可（含 board_type 和 origin）
+    required_keys = ["board_type", "squares_x", "squares_y", "square_len_m", "marker_len_m",
+                     "aruco_dict", "origin", "px_per_square", "margin_px"]
     for k in required_keys:
         if k not in meta or meta[k] is None:
             raise KeyError(f"[错误] 标定板元数据缺失关键字段: '{k}'，请检查 {meta_path}")
@@ -31,8 +31,7 @@ def extract_info(xml_path, meta_path):
         model = mujoco.MjModel.from_xml_path(xml_path)
     except Exception as e:
         raise RuntimeError(f"[错误] 无法加载 MuJoCo 模型: {e}")
-    
-    # 加载并严格校验标定板元数据（如果失败，直接在这里抛异常退出）
+
     print(f"正在读取标定板参数: {meta_path} ...\n")
     board_meta = load_board_meta(meta_path)
 
@@ -144,10 +143,7 @@ def extract_info(xml_path, meta_path):
     print()
     print("simulation:")
     print(f'  model_path: "{xml_path}"')
-    print(f'  camera_name: "{cam_name}"')
     print(f'  base_body: "{base_body}"')
-    print(f'  render_width: 1280')
-    print(f'  render_height: 720')
     print(f'  target_fps: 60')
     print()
     print("robot:")
@@ -172,18 +168,19 @@ def extract_info(xml_path, meta_path):
     print(f'    - {{ inc: "y", dec: "h" }}')
     print()
     print("board:")
-    print(f'  type: "{board_meta.get("board_type", "charuco")}"')
+    print(f'  type: "{board_meta["board_type"]}"')
     print(f'  squares_x: {board_meta["squares_x"]}')
     print(f'  squares_y: {board_meta["squares_y"]}')
     print(f'  square_len: {board_meta["square_len_m"]}')
     print(f'  marker_len: {board_meta["marker_len_m"]}')
     print(f'  aruco_dict: "{board_meta["aruco_dict"]}"')
-    print(f'  origin: "{board_meta.get("origin", "center")}"')
+    print(f'  origin: "{board_meta["origin"]}"')
     print(f'  px_per_square: {board_meta["px_per_square"]}')
     print(f'  margin_px: {board_meta["margin_px"]}')
     print(f'  border_bits: 1')
     print(f'  image_path: "charuco_board.png"')
     print(f'  meta_path: "{meta_path}"')
+    print(f'  min_corners_intrinsic: 6')
     print(f'  min_corners_handeye: 6')
     print(f'  scene:')
     print(f'    enabled: true')
@@ -213,8 +210,6 @@ def extract_info(xml_path, meta_path):
     print(f'  min_samples: 10')
     print(f'  max_reproj_err_px: 1.0')
     print(f'  method: "TSAI"')
-    print(f'  verify_ok_angle_deg: 1.0')
-    print(f'  verify_ok_trans_m: 0.01')
     print(f'  result_npy: "hand_eye_result.npy"')
     print(f'  result_json: "hand_eye_result.json"')
     print("```")
@@ -228,9 +223,9 @@ def extract_info(xml_path, meta_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="MuJoCo 模型与标定板资产信息提取工具")
     parser.add_argument("--model", type=str, required=True, help="MuJoCo XML 模型路径")
-    parser.add_argument("--meta", type=str, default="charuco_board_meta.json", help="标定板元数据路径")
+    parser.add_argument("--meta", type=str, required=True, help="标定板元数据路径")
     args = parser.parse_args()
-    
+
     try:
         extract_info(args.model, args.meta)
     except Exception as e:
