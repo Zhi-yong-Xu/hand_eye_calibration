@@ -48,7 +48,8 @@ python calibrate_intrinsics.py --config config/kuka.yaml
 python hand_eye_calibration.py --config config/kuka.yaml
 ```
 
-### config 文件配置教程
+## config 文件配置教程
+### 示例
 ```
 # =====================================================
 # 手眼标定配置  (Eye-in-Hand, 标定目标 = ee_site)
@@ -158,3 +159,12 @@ calibration:
   result_npy: "hand_eye_result.npy"      # 输出矩阵文件
   result_json: "hand_eye_result.json"    # 输出报告文件
 ```
+### 模板生成
+```
+python extract_info.py --model path/to/your_robot.xml --meta charuco_board_meta.json
+```
+
+
+## 展示
+
+<img width="1223" height="698" alt="image" src="https://github.com/user-attachments/assets/6e0425e9-159e-4439-bb0a-d77533dfab9b" />
