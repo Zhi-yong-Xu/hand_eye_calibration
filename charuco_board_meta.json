@@ -1,0 +1,19 @@
+{
+  "board_type": "charuco",
+  "squares_x": 4,
+  "squares_y": 6,
+  "square_len_m": 0.04,
+  "marker_len_m": 0.03,
+  "aruco_dict": "DICT_6X6_250",
+  "origin": "center",
+  "inner_corner_grid": [
+    3,
+    5
+  ],
+  "px_per_square": 200,
+  "margin_px": 0,
+  "board_physical_size_m": [
+    0.16,
+    0.24
+  ]
+}
