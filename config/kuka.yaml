@@ -1,0 +1,120 @@
+# =====================================================
+# 手眼标定配置  (Eye-in-Hand, 标定目标 = ee_site)
+# =====================================================
+
+# ---------- 仿真环境 ----------
+simulation:
+  model_path: "model/kuka/iiwa14.xml"
+  duration: null
+  camera_name: "wrist_cam"
+  base_body: "base"
+  render_width: 1280
+  render_height: 720
+  target_fps: 60
+
+# ---------- 机器人 ----------
+robot:
+  type: "arx_l5"
+  joint_names: ["joint1","joint2","joint3","joint4","joint5","joint6","joint7"]
+  ee_site: "tool0"
+  keyframe: "home"
+
+  # ---------- 控制模式 ----------
+  # joint     : 按键直接改关节角
+  # cartesian : 按键生成末端 6D 速度，用 DLS 转关节速度
+  control_mode: "cartesian"
+
+  # ---------- 笛卡尔控制参数 ----------
+  cartesian:
+    linear_speed: 0.05      # m/s
+    angular_speed: 0.5      # rad/s
+    damping: 0.05           # DLS λ
+    max_joint_vel: 1.0      # rad/s
+
+  # ---------- 关节控制参数（仅 joint 模式） ----------
+  joint_step: 0.02
+  smoothing: 0.10
+
+  # ---------- 按键语义 ----------
+  # joint     : J1..J6
+  # cartesian : 前 3 = world x/y/z，后 3 = world rx/ry/rz
+  # 功能键（space/enter/esc/c/p/n）不可出现在此表
+  key_map:
+    - { inc: "q", dec: "a" }   # J1 / +x
+    - { inc: "w", dec: "s" }   # J2 / +y
+    - { inc: "e", dec: "d" }   # J3 / +z
+    - { inc: "r", dec: "f" }   # J4 / +rx
+    - { inc: "t", dec: "g" }   # J5 / +ry
+    - { inc: "y", dec: "h" }   # J6 / +rz
+
+# ---------- 标定板 ----------
+board:
+  type: "charuco"
+  squares_x: 4
+  squares_y: 6
+  square_len: 0.04
+  marker_len: 0.03
+  aruco_dict: "DICT_6X6_250"
+  origin: "center"
+  px_per_square: 200
+  margin_px: 0
+  border_bits: 1
+  image_path: "charuco_board.png"
+  meta_path: "charuco_board_meta.json"
+
+  # ---------- 角点数量阈值 ----------
+  # 内参标定：实测 6 比 4 更准（4~5 角点 PnP 噪声大，污染标定）
+  min_corners_intrinsic: 6
+
+  # 手眼标定：PnP 稳健性优先，6 同上
+  min_corners_handeye: 6
+
+  # ---------- 场景自动注入 ----------
+  scene:
+    enabled: true
+    body_name:     "calib_auto_board"
+    texture_name:  "calib_auto_board_tex"
+    material_name: "calib_auto_board_mat"
+
+    place_mode: "manual"
+
+    # MuJoCo 内旋 intrinsic XYZ
+    #   [0, 0, 0]       → 平放（法线 +Z）
+    #   [0, +1.5708, 0] → 面朝 +X
+    #   [0, -1.5708, 0] → 面朝 -X（面向机器人原点）
+    pos:   [-1.0, 0.0, 0.4]
+    euler: [0, 1.5708, 0]
+
+    # auto_in_front（manual 模式时预留）
+    distance: 0.5
+    height_offset: 0.3
+
+    thickness: 0.004
+    add_collision: false
+
+# ---------- 相机与内参 ----------
+camera:
+  name: "wrist_cam"
+  render_width: 1280
+  render_height: 720
+
+  # analytic  : XML 解析（仿真真值，手眼误差 < 1mm）
+  # manual    : 用下方 manual_intrinsics（手工标定值，手眼误差 ~3~5mm）
+  # calibrate : 启动用解析真值，按 C 标定、P 应用后才能手眼标定
+  intrinsics_mode: "manual"
+
+  manual_intrinsics:
+    fx: 870.2661
+    fy: 870.9711
+    cx: 640.5903
+    cy: 360.0630
+
+# ---------- 标定参数 ----------
+calibration:
+  min_samples: 10
+  max_reproj_err_px: 1.0
+  method: "TSAI"
+  verify_ok_angle_deg: 1.0
+  verify_ok_trans_m: 0.01
+  result_npy: "hand_eye_result.npy"
+  result_json: "hand_eye_result.json"
