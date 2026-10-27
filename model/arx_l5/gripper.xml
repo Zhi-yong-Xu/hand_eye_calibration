@@ -1,0 +1,67 @@
+<mujoco model="ARX L5">
+  <compiler angle="radian" meshdir="assets"/>
+
+  <option integrator="implicitfast" cone="elliptic" impratio="10"/>
+
+  <default>
+    <default class="arx_l5">
+      <joint frictionloss="0.3" armature="0.005"/>
+      <position inheritrange="1" forcerange="-100 100"/>
+      <default class="finger">
+        <joint frictionloss="0" type="slide"/>
+        <position forcerange="-10 10"/>
+      </default>
+      <default class="visual">
+        <geom group="2" type="mesh" contype="0" conaffinity="0" density="0"/>
+      </default>
+      <default class="collision">
+        <geom group="3" type="capsule"/>
+      </default>
+    </default>
+  </default>
+
+  <asset>
+    <material name="black_mat" rgba="0.1 0.1 0.1 1"/>
+
+    <mesh name="gripper_base" file="gripper_base.obj"/>
+    <mesh name="gripper1" file="gripper1.obj"/>
+    <mesh name="gripper2" file="gripper2.obj"/>
+  </asset>
+
+  <worldbody>
+    <light mode="targetbodycom" target="gripper2" pos="1 0 1"/>
+    <body name="gripper_base" pos="0.025286 0 0.083391" quat="-3.67321e-06 1 0 0">
+      <inertial pos="0.041697 2.4368e-05 0.00014464" quat="0.5 0.5 -0.5 0.5" mass="0.44089"
+        diaginertia="0.0005 0.00038 0.00028"/>
+      <joint name="joint6" axis="1 0 0" range="-3.14 3.14"/>
+      <geom mesh="gripper_base" material="black_mat" class="visual"/>
+      <geom mesh="gripper_base" class="collision"/>
+      <body name="gripper1" pos="0.08657 0.024896 -0.0002436" gravcomp="1">
+        <inertial pos="-0.00035522 -0.007827 -0.0029883" quat="0.5 0.5 0.5 0.5" mass="0.064798"
+          diaginertia="3e-05 3e-05 2e-05"/>
+        <joint name="joint7" axis="0 1 0" class="finger" range="0 0.044"/>
+        <geom mesh="gripper1" material="black_mat" class="visual"/>
+        <geom type="box" size=".02 .002 .00525" pos="0.05 -0.023 0" rgba="1 0 0 1" class="collision"/>
+        <geom type="box" size=".015 .002 .018" pos="0.015 -0.023 0" rgba="0 0 1 1" class="collision"/>
+      </body>
+      <body name="gripper2" pos="0.08657 -0.0249 -0.00024366" gravcomp="1">
+        <inertial pos="-0.000355223 0.00782769 0.00242006" quat="0.5 0.5 0.5 0.5" mass="0.0647982"
+          diaginertia="3e-05 3e-05 2e-05"/>
+        <joint name="joint8" axis="0 1 0" class="finger" range="-0.044 0"/>
+        <geom mesh="gripper2" material="black_mat" class="visual"/>
+        <geom type="box" size=".02 .002 .00525" pos="0.05 0.023 0" rgba="1 0 0 1" class="collision"/>
+        <geom type="box" size=".015 .002 .018" pos="0.015 0.023 0" rgba="0 0 1 1" class="collision"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <equality>
+    <joint joint1="joint7" joint2="joint8" polycoef="0 -1 0 0 0"/>
+  </equality>
+
+  <actuator>
+    <position name="joint6" joint="joint6" class="arx_l5" kp="10" kv="1.5"/>
+    <position name="gripper" joint="joint7" class="finger" kp="40" kv="5"/>
+  </actuator>
+
+</mujoco>
